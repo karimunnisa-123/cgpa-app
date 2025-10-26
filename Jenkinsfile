@@ -2,13 +2,16 @@ pipeline {
     agent any
 
     environment {
-        // Update these paths if needed
-        MAVEN_HOME = "C:\\Program Files\\Apache\\maven-3.9.9"
         DOCKER_IMAGE = "cgpa-app"
         GIT_REPO = "https://github.com/karimunnisa-123/cgpa-app.git"
     }
 
+    tools {
+        maven "Maven"  // Name you set in Jenkins Global Tool Configuration
+    }
+
     stages {
+
         stage('Checkout') {
             steps {
                 git branch: 'main', url: "${GIT_REPO}", credentialsId: 'github-creds'
@@ -17,7 +20,10 @@ pipeline {
 
         stage('Build with Maven') {
             steps {
-                bat '"%MAVEN_HOME%\\bin\\mvn" clean package -DskipTests'
+                // Uses the Maven tool configured in Jenkins
+                withMaven(maven: 'Maven') {
+                    bat 'mvn clean package -DskipTests'
+                }
             }
         }
 
@@ -29,8 +35,11 @@ pipeline {
 
         stage('Run Docker Container') {
             steps {
-                bat "docker stop ${DOCKER_IMAGE} || echo 'No old container'"
-                bat "docker rm ${DOCKER_IMAGE} || echo 'No old container'"
+                // Stop old container if exists
+                bat "docker stop ${DOCKER_IMAGE} || echo 'No old container running'"
+                bat "docker rm ${DOCKER_IMAGE} || echo 'No old container to remove'"
+                
+                // Run new container
                 bat "docker run -d -p 8080:8080 --name ${DOCKER_IMAGE} ${DOCKER_IMAGE}"
             }
         }
@@ -38,10 +47,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Build and deployment successful!'
+            echo '✅ Build, Dockerize and run successful!'
         }
         failure {
-            echo '❌ Build failed. Check logs.'
+            echo '❌ Pipeline failed. Check console output for errors.'
         }
     }
 }
