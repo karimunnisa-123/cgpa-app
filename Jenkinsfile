@@ -1,49 +1,48 @@
 pipeline {
     agent any
 
-    tools {
-        maven "Maven-Default"   // use Jenkins default Maven installation
-        jdk "JDK24"             // your actual JDK name (shown in Jenkins)
+    environment {
+        MAVEN_HOME = tool 'Maven 3.9'       // or your installed Maven name
+        JAVA_HOME = tool 'JDK 17'            // or whatever JDK you configured in Jenkins
+        PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${PATH}"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/karimunnisa-123/cgpa-app.git'
+                echo '🔹 Checking out source code...'
+                git branch: 'main', url: 'https://github.com/karimunnisa-123/cgpa-app.git'
             }
         }
 
         stage('Build with Maven') {
             steps {
-                script {
-                    echo "Building project..."
-                    bat '"%MAVEN_HOME%\\bin\\mvn" clean package -DskipTests'
-                }
+                echo '🔹 Building the project with Maven...'
+                bat '"%MAVEN_HOME%\\bin\\mvn" clean package -DskipTests=true'
             }
         }
 
         stage('Verify Artifact') {
             steps {
-                script {
-                    echo "Checking if WAR file was created..."
-                    bat 'dir target'
-                }
+                echo '🔹 Verifying build output...'
+                bat 'dir target'
             }
         }
 
         stage('Deploy Simulation') {
             steps {
-                echo "✅ Build completed successfully! WAR file is ready in the target folder."
+                echo '🚀 Simulating deployment...'
+                bat 'echo "Deploying CGPA App (simulation only)"'
             }
         }
     }
 
     post {
         success {
-            echo "🎉 Jenkins build succeeded!"
+            echo '✅ Build completed successfully!'
         }
         failure {
-            echo "❌ Jenkins build failed. Check logs for details."
+            echo '❌ Jenkins build failed. Check logs for details.'
         }
     }
 }
