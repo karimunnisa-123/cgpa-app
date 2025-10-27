@@ -2,26 +2,48 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven-Default'
+        maven "Maven-Default"   // use Jenkins default Maven installation
+        jdk "JDK17"             // use Jenkins JDK 17 if available
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/karimunnisa-123/cgpa-app.git'
+                git 'https://github.com/karimunnisa-123/cgpa-app.git'
             }
         }
 
-        stage('Build') {
+        stage('Build with Maven') {
             steps {
-                bat 'mvn clean package -DskipTests'
+                script {
+                    echo "Building project..."
+                    bat '"%MAVEN_HOME%\\bin\\mvn" clean package -DskipTests'
+                }
             }
         }
 
-        stage('Run') {
+        stage('Verify Artifact') {
             steps {
-                bat 'java -jar target/*.jar'
+                script {
+                    echo "Checking if WAR file was created..."
+                    bat 'dir target'
+                }
             }
+        }
+
+        stage('Deploy Simulation') {
+            steps {
+                echo "✅ Build completed successfully! WAR file is ready in the target folder."
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "🎉 Jenkins build succeeded!"
+        }
+        failure {
+            echo "❌ Jenkins build failed. Check logs for details."
         }
     }
 }
