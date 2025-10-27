@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         MAVEN_HOME = tool 'Maven 3.9'       // or your installed Maven name
-        JAVA_HOME = tool 'JDK 24'            // or whatever JDK you configured in Jenkins
+        JAVA_HOME = tool 'JDK24'            // or whatever JDK you configured in Jenkins
         PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${PATH}"
     }
 
