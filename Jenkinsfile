@@ -16,21 +16,28 @@ pipeline {
 
         stage('Build with Maven') {
             steps {
-                echo '🔹 Building project...'
-                bat '"%MAVEN_HOME%\\bin\\mvn" -f pom.xml clean package -DskipTests=true'
+                script {
+                    echo '🔹 Finding pom.xml...'
+                    // Find pom.xml anywhere in the workspace
+                    def pomPath = bat(script: 'for /r %cd% %%f in (pom.xml) do echo %%f', returnStdout: true).trim()
+                    echo "✅ Found pom.xml at: ${pomPath}"
+                    
+                    // Build project
+                    bat "\"%MAVEN_HOME%\\bin\\mvn\" -f \"${pomPath}\" clean package -DskipTests=true"
+                }
             }
         }
 
         stage('Verify Artifact') {
             steps {
                 echo '✅ Checking target folder...'
-                bat 'dir target'
+                bat 'dir /s /b target\\*.war'
             }
         }
 
         stage('Deploy Simulation') {
             steps {
-                echo '🚀 Deploy simulation (build successful, jar ready).'
+                echo '🚀 Build successful. WAR ready for deployment!'
             }
         }
     }
