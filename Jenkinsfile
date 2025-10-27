@@ -1,10 +1,9 @@
 pipeline {
     agent any
 
-    environment {
-        MAVEN_HOME = tool 'Maven 3.9'       // or your installed Maven name
-        JAVA_HOME = tool 'JDK24'            // or whatever JDK you configured in Jenkins
-        PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${PATH}"
+    tools {
+        jdk 'JDK24'
+        maven 'Maven 3.9'
     }
 
     stages {
@@ -17,29 +16,28 @@ pipeline {
 
         stage('Build with Maven') {
             steps {
-                echo '🔹 Building the project with Maven...'
-                bat '"%MAVEN_HOME%\\bin\\mvn" clean package -DskipTests=true'
+                echo '🔹 Building project...'
+                bat '"%MAVEN_HOME%\\bin\\mvn" -f pom.xml clean package -DskipTests=true'
             }
         }
 
         stage('Verify Artifact') {
             steps {
-                echo '🔹 Verifying build output...'
+                echo '✅ Checking target folder...'
                 bat 'dir target'
             }
         }
 
         stage('Deploy Simulation') {
             steps {
-                echo '🚀 Simulating deployment...'
-                bat 'echo "Deploying CGPA App (simulation only)"'
+                echo '🚀 Deploy simulation (build successful, jar ready).'
             }
         }
     }
 
     post {
         success {
-            echo '✅ Build completed successfully!'
+            echo '✅ Jenkins build succeeded!'
         }
         failure {
             echo '❌ Jenkins build failed. Check logs for details.'
