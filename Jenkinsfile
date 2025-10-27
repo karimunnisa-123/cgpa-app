@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         maven "Maven-Default"   // use Jenkins default Maven installation
-        jdk "JDK17"             // use Jenkins JDK 17 if available
+        jdk "JDK24"             // your actual JDK name (shown in Jenkins)
     }
 
     stages {
